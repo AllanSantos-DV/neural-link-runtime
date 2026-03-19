@@ -1,0 +1,8 @@
+node_modules/
+*.weights.json
+*.weights.json.backup.json
+*.backup.json
+logs/
+weights/
+pending-training.json
+.neural-link.weights.json

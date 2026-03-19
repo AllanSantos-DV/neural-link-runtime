@@ -1,0 +1,215 @@
+{
+  "version": "1.0",
+  "threshold": 0.5,
+  "defaultTimeout": 5000,
+  "eventTimeouts": {
+    "Stop": 12000
+  },
+  "learning": {
+    "lambda": 0.4,
+    "defaultWeight": 0.55,
+    "enableDefaultWeight": true,
+    "learningRate": 0.01,
+    "minActivations": 20,
+    "floors": {
+      "pre-commit-guard": 0.8
+    },
+    "ceilings": {},
+    "llmFallback": {
+      "enabled": false,
+      "margin": 0.1,
+      "timeout": 2000,
+      "adjustment": 0.1,
+      "endpoint": null,
+      "model": null,
+      "apiKey": null
+    }
+  },
+  "handlers": {
+    "pre-commit-guard": {
+      "enabled": true,
+      "events": ["PreToolUse"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/pre-commit-guard.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\pre-commit-guard.ps1"
+      },
+      "timeout": 5000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.95,
+        "implementor": 0.95,
+        "researcher": 0.95,
+        "validator": 0.95,
+        "test-implementor": 0.95,
+        "test-reader": 0.95
+      },
+      "modifiers": [
+        {
+          "condition": "tool_name == 'run_in_terminal' && command_matches('git (push|tag|reset\\s+--hard|rebase|force-push)')",
+          "adjust": "+0.05"
+        },
+        {
+          "condition": "tool_name == 'run_in_terminal' && command_matches('rm\\s+-(r|rf|fr)|rmdir\\s+/s|del\\s+/s|format\\s+|mkfs')",
+          "adjust": "+0.05"
+        },
+        {
+          "condition": "tool_name != 'run_in_terminal'",
+          "adjust": "=0.0"
+        }
+      ]
+    },
+    "stop-checklist": {
+      "enabled": true,
+      "events": ["Stop"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/stop-checklist.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\stop-checklist.ps1"
+      },
+      "timeout": 10000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.0,
+        "implementor": 1.0,
+        "researcher": 0.0,
+        "validator": 0.0,
+        "test-implementor": 1.0,
+        "test-reader": 0.0
+      },
+      "modifiers": []
+    },
+    "verify-claims": {
+      "enabled": true,
+      "events": ["Stop"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/verify-claims.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\verify-claims.ps1"
+      },
+      "timeout": 5000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.9,
+        "implementor": 0.9,
+        "researcher": 0.9,
+        "validator": 0.9,
+        "test-implementor": 0.9,
+        "test-reader": 0.9
+      },
+      "modifiers": [
+        {
+          "condition": "transcript_has_file_references == false",
+          "adjust": "=0.3"
+        }
+      ]
+    },
+    "context-confidence-check": {
+      "enabled": true,
+      "events": ["Stop"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/context-confidence-check.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\context-confidence-check.ps1"
+      },
+      "timeout": 10000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.85,
+        "implementor": 0.85,
+        "researcher": 0.85,
+        "validator": 0.85,
+        "test-implementor": 0.85,
+        "test-reader": 0.85
+      },
+      "modifiers": [
+        {
+          "condition": "transcript_has_confidence_table == false",
+          "adjust": "=0.0"
+        }
+      ]
+    },
+    "output-format": {
+      "enabled": true,
+      "events": ["Stop"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/output-format.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\output-format.ps1"
+      },
+      "timeout": 10000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.0,
+        "implementor": 0.0,
+        "researcher": 0.95,
+        "validator": 0.95,
+        "test-implementor": 0.0,
+        "test-reader": 0.95
+      },
+      "modifiers": []
+    },
+    "skill-feedback": {
+      "enabled": true,
+      "events": ["Stop"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/skill-feedback.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\skill-feedback.ps1"
+      },
+      "timeout": 5000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.8,
+        "implementor": 0.8,
+        "researcher": 0.8,
+        "validator": 0.8,
+        "test-implementor": 0.8,
+        "test-reader": 0.8
+      },
+      "modifiers": [
+        {
+          "condition": "transcript_has_skill_read == false",
+          "adjust": "=0.0"
+        }
+      ]
+    },
+    "subagent-audit": {
+      "enabled": true,
+      "events": ["SubagentStart"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/subagent-audit.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\subagent-audit.ps1"
+      },
+      "timeout": 5000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.9,
+        "implementor": 0.0,
+        "researcher": 0.0,
+        "validator": 0.0,
+        "test-implementor": 0.0,
+        "test-reader": 0.0
+      },
+      "modifiers": []
+    },
+    "lesson-injector": {
+      "enabled": true,
+      "events": ["UserPromptSubmit"],
+      "script": {
+        "bash": "~/.copilot/hooks/scripts/lesson-injector.sh",
+        "windows": "$HOME\\.copilot\\hooks\\scripts\\lesson-injector.ps1"
+      },
+      "timeout": 5000,
+      "threshold": null,
+      "weights": {
+        "orchestrator": 0.85,
+        "implementor": 0.85,
+        "researcher": 0.85,
+        "validator": 0.85,
+        "test-implementor": 0.85,
+        "test-reader": 0.85
+      },
+      "modifiers": [
+        {
+          "condition": "active_skills_include('safety-check')",
+          "adjust": "+0.1"
+        }
+      ]
+    }
+  }
+}

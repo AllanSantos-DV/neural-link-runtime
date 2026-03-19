@@ -1,0 +1,6 @@
+{
+  "neuralLink": {
+    "isRuntime": true,
+    "configTemplate": "neural-link.config.json"
+  }
+}
