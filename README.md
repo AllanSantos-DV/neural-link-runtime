@@ -1,24 +1,28 @@
 # Neural Link Runtime
 
-Adaptive hook dispatcher for VS Code Copilot agents. Replaces individual hook scripts with a single intelligent dispatcher that learns from agent behavior.
+Dispatcher adaptativo de hooks para agentes do VS Code Copilot. Substitui scripts de hook individuais por um dispatcher inteligente que aprende com o comportamento dos agentes.
 
-## What is Neural Link?
+*Adaptive hook dispatcher for VS Code Copilot agents.*
 
-Neural Link sits between VS Code Copilot and your hook scripts. Instead of each agent calling hooks directly, Neural Link:
+---
 
-- **Scores** each hook per event/agent/context using declarative rules + learned weights
-- **Filters** hooks below threshold (skip irrelevant ones)
-- **Executes** only relevant hooks in parallel
-- **Composes** results (veto/inject/modify) into a single response
-- **Learns** from outcomes to improve future decisions
+## O que é o Neural Link?
 
-## Installation
+O Neural Link fica entre o VS Code Copilot e seus scripts de hook. Em vez de cada agente chamar hooks diretamente, o Neural Link:
 
-### Via Skill Manager (recommended)
+- **Avalia** cada hook por evento/agente/contexto usando regras declarativas + pesos aprendidos
+- **Filtra** hooks abaixo do threshold (ignora os irrelevantes)
+- **Executa** apenas hooks relevantes em paralelo
+- **Compõe** resultados (veto/inject/modify) em uma resposta única
+- **Aprende** com os resultados para melhorar decisões futuras
 
-1. Install the [Copilot Skill Manager](https://marketplace.visualstudio.com/items?itemName=allansantos-dv.copilot-skill-manager) extension
-2. Add this repository: `https://github.com/AllanSantos-DV/neural-link-runtime.git`
-3. Enable Neural Link: `Ctrl+Shift+P` → "Neural Link: Enable"
+## Instalação
+
+### Via Skill Manager (recomendado)
+
+1. Instale a extensão [Copilot Skill Manager](https://marketplace.visualstudio.com/items?itemName=allansantos-dv.copilot-skill-manager)
+2. Adicione este repositório: `https://github.com/AllanSantos-DV/neural-link-runtime.git`
+3. Ative o Neural Link: `Ctrl+Shift+P` → "Neural Link: Enable"
 
 ### Manual
 
@@ -34,20 +38,35 @@ powershell ./install.ps1
 bash ./install.sh
 ```
 
-## Requirements
+## Requisitos
 
-- **Node.js >= 18** (VS Code's bundled Node works automatically)
-- **VS Code** with GitHub Copilot
+- **Node.js >= 18** (o Node embutido do VS Code funciona automaticamente)
+- **VS Code** com GitHub Copilot
 
-## Configuration
+## Configuração
 
-The `neural-link.config.json` defines handlers, events, weights, and learning parameters. The Skill Manager manages this automatically — manual editing is for advanced users.
+O `neural-link.config.json` define handlers, eventos, pesos e parâmetros de aprendizado. O Skill Manager gerencia isso automaticamente — edição manual é para usuários avançados.
 
-## Structure
+## Criando seu Próprio Runtime
+
+Qualquer pessoa pode criar um runtime Neural Link customizado. O contrato mínimo:
+
+```
+seu-runtime/
+├── src/index.js              ← Entry point (obrigatório)
+├── src/*.js                  ← Módulos do runtime
+├── package.json              ← Versão semver (obrigatório)
+├── neural-link.config.json   ← Config base (obrigatório)
+└── .skillmanager.json        ← { "neuralLink": { "isRuntime": true } }
+```
+
+O runtime recebe JSON via stdin (formato VS Code Copilot hooks) e responde com JSON via stdout. O Skill Manager detecta repos com `isRuntime: true` automaticamente no "Add Repository".
+
+## Estrutura / Structure
 
 ```
 src/
-├── index.js          ← Entry point (reads stdin JSON, outputs JSON)
+├── index.js          ← Entry point (stdin JSON → stdout JSON)
 ├── dispatcher.js     ← Pipeline orchestrator
 ├── sensor.js         ← Context extraction from VS Code stdin
 ├── scoring.js        ← Declarative + learned scoring
