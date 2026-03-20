@@ -7,7 +7,7 @@
  * Reward signals (Phase 1 — observable without user input):
  *   +1.0  handler blocked and hook returned non-empty output (useful block)
  *   +0.7  handler activated and returned structured decision (did something)
- *   +0.3  handler activated but returned empty/allow (ran but no-op)
+ *   +0.0  handler activated but returned empty/allow (ran but no-op — neutral)
  *   +0.0  no signal (handler not in active set — don't update)
  * 
  * Phase B3: PostToolUse error detection
@@ -182,8 +182,8 @@ function deriveReward(result) {
     return 0.5;
   }
 
-  // Allow with nothing = handler ran but was effectively no-op
-  return 0.3;
+  // Allow with nothing = handler ran but was effectively no-op (neutral)
+  return 0.0;
 }
 
 export { deriveReward };

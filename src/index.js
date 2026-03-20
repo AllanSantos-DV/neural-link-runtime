@@ -1,5 +1,6 @@
 import { dispatch } from './dispatcher.js';
 import { loadConfig } from './config.js';
+import { checkCalibration, buildCalibrationResponse } from './calibration.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
@@ -48,6 +49,20 @@ async function main() {
   // Anti-loop guard
   if (stdinJson.stop_hook_active === true) {
     process.exit(0);
+  }
+
+  // SessionStart auto-calibration check
+  const eventName = stdinJson.event ?? stdinJson.hook_event_name ?? stdinJson.hookEventName;
+  if (eventName === 'SessionStart') {
+    const config = loadConfig();
+    const calibrationResult = checkCalibration(config);
+    if (calibrationResult) {
+      const response = buildCalibrationResponse(calibrationResult.uncalibrated);
+      const calibrationOutput = JSON.stringify(response);
+      if (debug) debugDump(calibrationOutput, 'out');
+      process.stdout.write(calibrationOutput);
+      return;
+    }
   }
 
   const result = await dispatch(stdinJson);
