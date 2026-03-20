@@ -16,7 +16,7 @@ export function sense(stdinJson) {
 
   return {
     // Core identity
-    event_type: stdinJson.event ?? stdinJson.hookEventName ?? null,
+    event_type: stdinJson.event ?? stdinJson.hook_event_name ?? stdinJson.hookEventName ?? null,
     agent: stdinJson.agentName ?? null,
 
     // Workspace & session (official VS Code fields)

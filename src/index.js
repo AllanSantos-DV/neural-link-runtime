@@ -10,7 +10,7 @@ function debugDump(raw, suffix) {
   try {
     const now = new Date();
     const ts = now.toISOString().replace(/:/g, '-').replace('Z', '').replace('.', '-');
-    const eventMatch = raw.match(/"event_type"\s*:\s*"([^"]+)"/);
+    const eventMatch = raw.match(/"hook_event_name"\s*:\s*"([^"]+)"/);
     const event = eventMatch ? eventMatch[1] : 'unknown';
     const filePath = join(DEBUG_DIR, `${ts}_${event}_${suffix}.json`);
     mkdir(DEBUG_DIR, { recursive: true })
