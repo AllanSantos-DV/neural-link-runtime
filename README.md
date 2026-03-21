@@ -68,10 +68,7 @@ Key settings:
     },
     "timeout": 5000,
     "threshold": null,
-    "weights": {
-      "implementor": 0.9,
-      "researcher": 0.3
-    },
+    "weight": 0.9,
     "modifiers": [
       {
         "condition": "tool_name == 'run_in_terminal'",
@@ -92,6 +89,7 @@ Key settings:
     "enableDefaultWeight": true,
     "learningRate": 0.01,
     "minActivations": 20,
+    "epsilon": 0.05,
     "floors": { "pre-commit-guard": 0.8 },
     "ceilings": {}
   }
@@ -99,10 +97,13 @@ Key settings:
 ```
 
 - `lambda` — decay rate for exponential moving average
-- `defaultWeight` — initial weight for unknown agent/handler pairs
+- `defaultWeight` — initial weight for unknown handler pairs
 - `learningRate` — how fast weights adjust from feedback
 - `minActivations` — minimum activations before adaptive scoring kicks in
+- `epsilon` — ε-greedy exploration rate (default `0.05`). With this probability, one below-threshold handler is included to collect data and prevent cold-lock
 - `floors` / `ceilings` — hard bounds per handler (weight never goes below/above)
+
+> **Scoring model:** Scoring is agent-agnostic — each handler carries a universal `weight` (instead of per-agent weight maps). Combined with ε-greedy exploration, this lets new handlers accumulate activations quickly regardless of which agent triggers them.
 
 Config cascade: Skill Manager merges **bundled defaults → repo config templates → local weights**, so user overrides always win.
 
@@ -224,6 +225,7 @@ Your runtime writes a single JSON object to stdout. The format depends on the ev
 {
   "hookSpecificOutput": {
     "permissionDecision": "allow",
+    "permissionDecisionReason": "optional descriptive reason",
     "additionalContext": "optional reason string",
     "neural_link": {
       "version": "1.0",
@@ -240,6 +242,8 @@ Your runtime writes a single JSON object to stdout. The format depends on the ev
 - `"allow"` — permit the tool call
 - `"deny"` — block the tool call
 - `"ask"` — prompt the user for confirmation
+
+When the decision is `"ask"` or `"deny"`, the compositor propagates `permissionDecisionReason` so VS Code can display a descriptive reason in the confirmation prompt.
 
 #### Stop response
 
@@ -286,6 +290,8 @@ deny/block > ask > allow
 ```
 
 Reasons from all handlers are concatenated. The `neural_link` metadata in the response includes per-handler scores so you can audit which handler drove the decision.
+
+The compositor (`src/compositor.js`) merges handler outputs and, for `PreToolUse` events, propagates `permissionDecisionReason` to the final payload so VS Code can show users why a tool call was flagged.
 
 ### Minimal "Hello World" Runtime
 
