@@ -69,8 +69,11 @@ export function compose(results, context) {
     // VS Code expects permissionDecision in hookSpecificOutput for PreToolUse
     const permMap = { block: 'deny', ask: 'ask', allow: 'allow' };
     output.hookSpecificOutput.permissionDecision = permMap[finalDecision] ?? finalDecision;
-    if (composedReason) {
-      output.hookSpecificOutput.additionalContext = composedReason;
+    // Collect reason: prefer composedReason (from handler top-level), fallback to merged additionalContext
+    const askReason = composedReason || mergedHookOutput.additionalContext || '';
+    if (askReason) {
+      output.hookSpecificOutput.additionalContext = askReason;
+      output.hookSpecificOutput.permissionDecisionReason = askReason;
     }
   } else {
     // Standard format for other events
