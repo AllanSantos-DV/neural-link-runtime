@@ -36,14 +36,7 @@
       },
       "timeout": 5000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.95,
-        "implementor": 0.95,
-        "researcher": 0.95,
-        "validator": 0.95,
-        "test-implementor": 0.95,
-        "test-reader": 0.95
-      },
+      "weight": 0.95,
       "modifiers": [
         {
           "condition": "tool_name == 'run_in_terminal' && command_matches('git (push|tag|reset\\s+--hard|rebase|force-push)')",
@@ -68,14 +61,7 @@
       },
       "timeout": 10000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.0,
-        "implementor": 1.0,
-        "researcher": 0.0,
-        "validator": 0.0,
-        "test-implementor": 1.0,
-        "test-reader": 0.0
-      },
+      "weight": 0.7,
       "modifiers": []
     },
     "verify-claims": {
@@ -87,14 +73,7 @@
       },
       "timeout": 5000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.9,
-        "implementor": 0.9,
-        "researcher": 0.9,
-        "validator": 0.9,
-        "test-implementor": 0.9,
-        "test-reader": 0.9
-      },
+      "weight": 0.9,
       "modifiers": [
         {
           "condition": "transcript_has_file_references == false",
@@ -111,14 +90,7 @@
       },
       "timeout": 10000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.85,
-        "implementor": 0.85,
-        "researcher": 0.85,
-        "validator": 0.85,
-        "test-implementor": 0.85,
-        "test-reader": 0.85
-      },
+      "weight": 0.85,
       "modifiers": [
         {
           "condition": "transcript_has_confidence_table == false",
@@ -135,14 +107,7 @@
       },
       "timeout": 10000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.0,
-        "implementor": 0.0,
-        "researcher": 0.95,
-        "validator": 0.95,
-        "test-implementor": 0.0,
-        "test-reader": 0.95
-      },
+      "weight": 0.7,
       "modifiers": []
     },
     "skill-feedback": {
@@ -154,14 +119,7 @@
       },
       "timeout": 5000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.8,
-        "implementor": 0.8,
-        "researcher": 0.8,
-        "validator": 0.8,
-        "test-implementor": 0.8,
-        "test-reader": 0.8
-      },
+      "weight": 0.8,
       "modifiers": [
         {
           "condition": "transcript_has_skill_read == false",
@@ -178,14 +136,7 @@
       },
       "timeout": 5000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.9,
-        "implementor": 0.0,
-        "researcher": 0.0,
-        "validator": 0.0,
-        "test-implementor": 0.0,
-        "test-reader": 0.0
-      },
+      "weight": 0.9,
       "modifiers": []
     },
     "lesson-injector": {
@@ -197,14 +148,7 @@
       },
       "timeout": 5000,
       "threshold": null,
-      "weights": {
-        "orchestrator": 0.85,
-        "implementor": 0.85,
-        "researcher": 0.85,
-        "validator": 0.85,
-        "test-implementor": 0.85,
-        "test-reader": 0.85
-      },
+      "weight": 0.85,
       "modifiers": [
         {
           "condition": "active_skills_include('safety-check')",

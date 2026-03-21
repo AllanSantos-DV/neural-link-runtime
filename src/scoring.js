@@ -18,21 +18,8 @@ export function scoreHandlers(context, config) {
     if (!handler.enabled) continue;
     if (!handler.events.includes(context.event_type)) continue;
 
-    // Configurable default weight for handlers without explicit agent weights.
-    // When enabled: new hooks score above threshold (0.55 > 0.5) so the learner
-    // can gather data. When disabled: unweighted handlers get 0.0 (never execute).
-    const enableDefault = learningConfig.enableDefaultWeight !== false;
-    const defaultWeight = enableDefault ? (learningConfig.defaultWeight ?? 0.55) : 0.0;
-    const hasExplicitWeight = context.agent in handler.weights;
-    let declarativeScore = hasExplicitWeight
-      ? handler.weights[context.agent]
-      : defaultWeight;
-
-    if (!hasExplicitWeight && enableDefault) {
-      console.warn(
-        `[neural-link] fallback weight applied: handler=${name}, agent=${context.agent}, weight=${defaultWeight}`
-      );
-    }
+    const defaultWeight = learningConfig.defaultWeight ?? 0.55;
+    let declarativeScore = handler.weight ?? defaultWeight;
 
     for (const mod of handler.modifiers) {
       if (evaluateCondition(mod.condition, context)) {
@@ -51,7 +38,7 @@ export function scoreHandlers(context, config) {
       score = learner.combine(name, declarativeScore, features.vector);
     }
 
-    results.push({ name, handler, score, declarativeScore, usedFallback: !hasExplicitWeight && enableDefault, features });
+    results.push({ name, handler, score, declarativeScore, features });
   }
 
   return results;
@@ -59,12 +46,27 @@ export function scoreHandlers(context, config) {
 
 /**
  * Filter scored handlers by threshold.
+ * Includes ε-greedy exploration: with probability epsilon, one below-threshold
+ * handler is included to collect data and prevent cold lock.
  */
 export function filterByThreshold(scored, config) {
-  return scored.filter(s => {
+  const active = scored.filter(s => {
     const threshold = s.handler.threshold ?? config.threshold;
     return s.score >= threshold;
   });
+
+  // ε-greedy exploration
+  const epsilon = config.learning?.epsilon ?? 0.05;
+  if (Math.random() < epsilon) {
+    const belowThreshold = scored.filter(s => !active.includes(s));
+    if (belowThreshold.length > 0) {
+      // Pick the one closest to threshold (most likely to be useful)
+      belowThreshold.sort((a, b) => b.score - a.score);
+      active.push({ ...belowThreshold[0], explorative: true });
+    }
+  }
+
+  return active;
 }
 
 // --- Condition evaluator ---

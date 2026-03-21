@@ -27,11 +27,20 @@ export function extractFeatures(context) {
   if (context.event_type) {
     names.push(`event:${context.event_type}`);
   }
-  if (context.agent) {
-    names.push(`agent:${context.agent}`);
-  }
   if (context.tool_name) {
     names.push(`tool:${context.tool_name}`);
+  }
+
+  // Stop hook active signal (discriminative for Stop events)
+  if (context.stop_hook_active != null) {
+    names.push(`stop_hook_active:${context.stop_hook_active}`);
+  }
+
+  // Tool input sub-fields (what kind of data the tool receives)
+  if (context.tool_input && typeof context.tool_input === 'object') {
+    for (const key of Object.keys(context.tool_input)) {
+      names.push(`input_has:${key}`);
+    }
   }
 
   // Command classification (semantic, not raw string)
@@ -41,26 +50,8 @@ export function extractFeatures(context) {
   }
 
   // --- Cross-features (pairwise interactions) ---
-  if (context.event_type && context.agent) {
-    names.push(`${context.event_type}×${context.agent}`);
-  }
   if (context.event_type && context.tool_name) {
     names.push(`${context.event_type}×${context.tool_name}`);
-  }
-  if (context.agent && context.tool_name) {
-    names.push(`${context.agent}×${context.tool_name}`);
-  }
-
-  // Triple cross-feature (most discriminative)
-  if (context.event_type && context.agent && context.tool_name) {
-    names.push(`${context.event_type}×${context.agent}×${context.tool_name}`);
-  }
-
-  // Agent + command class
-  if (context.agent && cmdClass.length > 0) {
-    for (const cls of cmdClass) {
-      names.push(`${context.agent}×cmd:${cls}`);
-    }
   }
 
   // --- Context-aware features (Phase B2) ---
@@ -80,13 +71,6 @@ export function extractFeatures(context) {
     names.push(`has_file_refs:${fileRefs}`);
     names.push(`has_confidence_table:${confTable}`);
     names.push(`has_skill_read:${skillRd}`);
-
-    // Cross-features: agent × transcript indicators
-    if (context.agent) {
-      if (fileRefs) names.push(`${context.agent}×has_file_refs`);
-      if (confTable) names.push(`${context.agent}×has_confidence_table`);
-      if (skillRd) names.push(`${context.agent}×has_skill_read`);
-    }
 
     // Cross-feature: event × has_transcript
     if (context.event_type) {

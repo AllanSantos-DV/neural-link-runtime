@@ -6,3 +6,5 @@ logs/
 weights/
 pending-training.json
 .neural-link.weights.json
+.mcp-memory/
+.vscode/
